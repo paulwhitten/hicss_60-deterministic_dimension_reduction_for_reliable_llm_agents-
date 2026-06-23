@@ -473,8 +473,8 @@ sampling non-determinism rather than development changes.
 % ============================================================
 
 Table~\ref{tab:ablation} shows the ablation study. Removing 2.5-D
-decomposition produces the largest accuracy drop (50.7 percentage points,
-$p < 0.0001$), reducing accuracy to 43.8\%.
+decomposition produces the largest accuracy drop (28.7 percentage points,
+$p < 0.0001$), reducing accuracy to 65.9\%.
 Underspecification questions contribute the second largest effect
 ($-17.9$ pp), consistent with the $p^* = 0.75$ threshold. Adaptive prompt
 enrichment accounts for $-11.3$ pp and the skip-forward rule for $-3.9$
@@ -492,7 +492,7 @@ is relative to the full system.}
 \textbf{Configuration} & \textbf{Mean} & $\sigma$ & $\Delta$ & $p$ \\
 \midrule
 Full system  & 94.6\% & 0.72\% & -- & -- \\
-$-$ 2.5-D decomp.     & 43.8\% & 1.42\% & $-$50.7 pp & $<$0.0001 \\
+$-$ 2.5-D decomp.     & 65.9\% & 1.24\% & $-$28.7 pp & $<$0.0001 \\
 $-$ Underspec.\ qs    & 76.7\% & 0.70\% & $-$17.9 pp & $<$0.0001 \\
 $-$ Enrichment        & 83.3\% & 1.29\% & $-$11.3 pp & $<$0.0001 \\
 $-$ Skip-forward      & 90.7\% & 1.22\% & $-$3.9 pp  & $<$0.0001 \\
@@ -619,7 +619,7 @@ systems in constrained domains.
 %the LLM output schema and compute them with a symbolic executor. &
 %Eliminating a dimension removes its error class entirely, not merely
 %reduces error frequency. &
-%$-$50.7 pp drop when 2.5-D decomposition is removed. IGLU transfer
+%$-$28.7 pp drop when 2.5-D decomposition is removed. IGLU transfer
 %confirms generality. \\[2pt]
 %I2 & Decompose by competency. Assign language understanding and plan
 %generation to the LLM. Assign coordinate arithmetic and constraint
@@ -655,7 +655,7 @@ constraints, or workflow state management constraints. Remove them from
 the LLM output schema and compute them with a symbolic executor.
 Eliminating a dimension removes its error class entirely, which is
 qualitatively different from prompt tuning or model scaling.
-The 50.7 pp accuracy drop when the 2.5-D decomposition is removed
+The 28.7 pp accuracy drop when the 2.5-D decomposition is removed
 confirms that the architectural boundary is the dominant reliability
 factor. The IGLU transfer confirms generality on an independent
 benchmark. The taxonomy in Section~3 distinguishes three categories of
