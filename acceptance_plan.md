@@ -124,19 +124,19 @@ by a reviewer.
 These address multiple reviewers, are text only, and stay within the no major
 changes rule.
 
-1. Moderate the generalization claim. Reviews 1 and 4. The passage The design
+1. Moderate the generalization claim. Completed. Reviews 1 and 4. The passage The design
    principle is domain-general. Any physically or logically constrained domain at
    hicss_submission.tex line 742 runs ahead of the evidence, which is one primary
    domain plus one transfer benchmark. Reframe as a conjecture supported by BWIM
    and IGLU, and add one sentence on where the deterministic versus reasoning
    boundary blurs in more complex tasks, which is Review 4 point.
-2. Condition the dominance claim on its assumption. Review 1. The contribution
+2. Condition the dominance claim on its assumption. Completed. Review 1. The contribution
    text says the executor strictly dominates for any positive error rate at
    hicss_submission.tex line 110, and the joint generation assumption is flagged
    but not tested at lines 246 and 416. Reword to dominates conditional on the
    stated assumptions, and make the conditional explicit where the claim first
    appears.
-3. Make the model tuning confound more prominent. Reviews 1 and 2. The prompts and
+3. Make the model tuning confound more prominent. Completed. Reviews 1 and 2. The prompts and
    enrichment were tuned for GPT-4o-mini and GPT-4o ran untuned, so the comparison
    cannot separate architecture from prompt optimization. State this limitation
    more prominently in the limitations discussion. This mirrors the tuning
@@ -152,6 +152,10 @@ These are more than a sentence but still need no new runs.
 2. Ground the taxonomy in literature. Review 2. Add citations for the three
    category taxonomy, geometric constraints, procedural knowledge constraints, and
    workflow state management constraints, near hicss_submission.tex line 746.
+   COMPLETED 2026-09-13. Added six references, Feldman make, Mokhov build systems,
+   van der Aalst workflow patterns, Kautz third AI summer, Sarker neuro-symbolic
+   trends, van Harmelen boxology. Cited in Background neuro-symbolic subsection and
+   in the Section 3 category grounding sentence. Build clean at 10 pages.
 3. Release implementation details. Review 1. Prompts and the adaptive enrichment
    rules are not in the manuscript. Point to the public repo, or add a short
    supplementary appendix, so others can build on the work.

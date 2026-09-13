@@ -127,9 +127,10 @@ transfer experiment.
 
 The contributions of this paper are: (1) the deterministic-dimension
 reduction design principle, including an analysis of multiplicative
-error accumulation showing that a symbolic executor strictly dominates
-the language model on deterministic output dimensions for any positive
-error rate, and a taxonomy of three categories of deterministic operations
+error accumulation showing that, under the stated assumptions, a symbolic
+executor dominates the language model on deterministic output dimensions
+for any positive error rate, and a taxonomy of three categories of
+deterministic operations
 in agentic systems, (2) a 2.5-D construction agent as a controlled
 instantiation of the principle, (3) a decision-theoretic framework for
 underspecification handling under asymmetric scoring, (4) a multi-context
@@ -158,7 +159,14 @@ neural and symbolic computation. \textcite{yi2018} decompose visual
 question answering into a neural perception module and a symbolic
 execution engine. \textcite{wang2023} show that separating planning from
 execution improves zero-shot reasoning. \textcite{khot2023} split complex
-tasks into sub-problems handled by specialized modules. Our approach
+tasks into sub-problems handled by specialized modules. Prior work also
+organizes this space with taxonomies. \textcite{kautz2022} distinguishes
+ways neural and symbolic components integrate, \textcite{vanharmelen2019}
+catalog compositional design patterns for hybrid systems, and
+\textcite{sarker2021} survey and classify recent work. These taxonomies
+categorize how neural and symbolic components combine, whereas our taxonomy
+categorizes deterministic operations by the source of the constraint, a
+complementary cut. Our approach
 extends this work by exploiting a dimensional constraint: the planning
 module operates in 2D while execution operates in 3D, a separation not
 explored in prior decomposed-prompting work.
@@ -331,7 +339,11 @@ A third category consists of protocols with known-correct execution
 sequences. Git fetch must precede checkout. Build must precede test. Test
 must precede merge. These sequences are fully determined before the agent
 runs, require no language model reasoning, and produce omission and
-sequencing errors when delegated to the LLM.
+sequencing errors when delegated to the LLM. Deterministic execution
+ordering is long formalized in software engineering, where build systems
+compute a correct order as a topological sort of a dependency graph
+\parencite{feldman1979, mokhov2018} and workflow systems catalog
+control-flow ordering constraints \parencite{aalst2003}.
 
 % ============================================================
 \section{Artifact: 2.5-D Construction Agent}
@@ -720,10 +732,12 @@ The 2.5-D decomposition depends on a gravity constraint that makes
 vertical coordinates computable. Tasks with free-form 3D placement or
 rotation degrees of freedom require a different decomposition.
 
-All enrichment rules and prompt examples were developed against
-GPT-4o-mini. The GPT-4o advantage may be understated, as the model
-comparison measures architecture value with a tuned small model against
-an untuned large model. The plan verifier null result ($p = 0.36$,
+A central limitation is that all enrichment rules and prompt examples were
+developed against GPT-4o-mini, while GPT-4o ran on the same pipeline with
+no model-specific tuning. The comparison therefore cannot separate the
+effect of the architecture from the effect of prompt optimization, and the
+GPT-4o result may be understated. A fair test would tune each model
+pipeline to a similar degree. The plan verifier null result ($p = 0.36$,
 $n = 7$) may reflect insufficient statistical power rather than a true
 null effect.
 
@@ -759,15 +773,20 @@ shows that a substantial fraction of residual failures originate in
 upstream LLM dependencies, a finding with direct implications for
 multi-agent system design.
 
-The design principle is domain-general. Any physically or logically
-constrained domain with deterministically computable output dimensions is
-a candidate for this approach, including terrain-following navigation,
-robotic assembly, and code generation under structural constraints. The
-taxonomy of three categories, geometric constraints, procedural knowledge
-constraints, and workflow state management constraints, provides a
-structure for identifying decomposition opportunities in new domains.
-The primary design lever is not model selection but responsibility
-boundary placement.
+The evidence here, one primary domain with a controlled ablation and one
+transfer benchmark, supports the conjecture that the design principle
+applies to other physically or logically constrained domains with
+deterministically computable output dimensions, including
+terrain-following navigation, robotic assembly, and code generation under
+structural constraints. We do not claim general applicability beyond what
+these two benchmarks show. The boundary between deterministic and
+reasoning dimensions is not always sharp, and in more complex tasks some
+dimensions are only partly determined by task state, which is where the
+principle needs further study. The taxonomy of three categories, geometric
+constraints, procedural knowledge constraints, and workflow state
+management constraints, provides a structure for identifying decomposition
+opportunities in new domains. The primary design lever is not model
+selection but responsibility boundary placement.
 
 % ============================================================
 \printbibliography[title={References}]
