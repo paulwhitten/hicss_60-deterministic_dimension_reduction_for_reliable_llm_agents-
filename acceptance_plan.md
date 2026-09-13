@@ -108,13 +108,16 @@ by a reviewer.
    replaces the Citation omitted for blind review placeholder, and the earlier
    preprint wording was updated to an earlier conference paper. Review 3 point 6
    is addressed.
-3. De-anonymize repository references at hicss_submission.tex line 8. The bwim
-   entry at references.bib line 5 already points to the public repo, confirm the
-   in text references are un-anonymized.
-4. Formatting pass. No header, footer, or page numbers. Letter size 8.5 by 11.
-   APA 7th references. Follow the Final Format Specifications template. Reviews 1
-   and 2 scored references 4 and 3, so a references completeness and style pass is
-   worthwhile.
+3. De-anonymize repository references. Completed. The stale double-blind header
+   comments were updated to the final camera-ready wording, and a body search
+   found no anonymized reference, the repository citations route through the bib
+   entries that already carry the public URLs.
+4. Formatting and references pass. References, completed. The audit-confirmed
+   fixes are applied and rebuilt, SayCan reordered to the published Ichter-first
+   order, Hevner pages corrected to 75-105, the Dziri URL fixed, and the NAECON
+   title acronyms brace-protected so 2.5-D and LLM render capitalized. Remaining,
+   confirm no header, footer, or page numbers, letter size 8.5 by 11, and that the
+   paper stays within the 10-page limit, per the Final Format Specifications.
 
 ## Stage 1, P1, cheap high value text edits, no new data
 
