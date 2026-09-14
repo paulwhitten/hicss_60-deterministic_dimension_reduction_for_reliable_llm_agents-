@@ -104,8 +104,8 @@ a publicly scored competition requiring block structure construction from
 natural-language instructions. The agent plans exclusively in the
 horizontal plane while a deterministic executor computes vertical
 placement via column occupancy. This 2.5-D decomposition, named by
-analogy with \textcite{marr2010}'s 2.5-D sketch and with 2.5-D machining
-\parencite{held1991}, reduces the likelihood of $y$-coordinate errors.
+analogy with \textcite{marr2010}'s 2.5-D sketch, reduces the likelihood
+of $y$-coordinate errors.
 
 An earlier conference paper presents the 2.5-D spatial construction
 method and a compact benchmark evaluation \parencite{11674959}. The
@@ -328,12 +328,9 @@ errors when asked to do so.
 Other constraints are codified rules that follow deterministically from
 observable input properties. In tabular machine learning, the correct
 handling of a null-valued boolean column is determined by the column's
-dtype and null statistics, not by language model judgment. Published best
-practices for machine learning engineering codify many such rules
-\parencite{zinkevich2017}: given data properties, preprocessing steps are
-a function of those properties, not a generation task. In code generation,
-bracket matching and type-consistency rules are similarly determined by
-language grammar rather than by content.
+dtype and null statistics, not by language model judgment. In code
+generation, bracket matching and type-consistency rules are similarly
+determined by language grammar rather than by content.
 
 A third category consists of protocols with known-correct execution
 sequences. Git fetch must precede checkout. Build must precede test. Test
@@ -466,6 +463,14 @@ systematic, input-predictable errors: identify recurring failure modes,
 classify by input trigger, write targeted corrections with examples,
 inject dynamically, and validate against regressions.
 
+The benchmark task, including the architect (green) agent and the scoring
+harness, is publicly available \parencite{bwim}. The extended report
+\parencite{11674959} describes the pipeline, and the complete source code,
+all planner prompts, the 15 adaptive enrichment rules, evaluation scripts,
+and scoring logs are released in the public implementation repository
+\parencite{bwimimpl} at tag v1.0.5, supporting independent reproduction and
+reuse of the method.
+
 % ============================================================
 \section{Evaluation Design}
 % ============================================================
@@ -546,10 +551,26 @@ competing system's 76.3\% using GPT-4o without a decomposition pipeline
 \parencite{hisandan}, indicating that the pipeline provides value
 independent of model-specific tuning.
 
-GPT-4o incurs approximately 16.7$\times$ higher per-token cost. Each
-160-round GPT-4o-mini run costs approximately \$0.07 versus \$1.10 for
-GPT-4o, a 16$\times$ cost difference for 4.3 percentage points lower
-accuracy on this pipeline.
+A cursory check supports cross-model generality. Running the identical
+untuned pipeline through Azure AI Foundry, DeepSeek-V3.2 reached 95.6 to
+96.2\% over six runs, Llama-4-Maverick a reproducible 91.2\%, and
+Kimi-K2.5 about 84\%, with no model-specific tuning. These are preliminary
+single-batch trials, and the logs are in the public repository.
+
+GPT-4o incurs approximately 16.7$\times$ higher per-token cost than
+GPT-4o-mini. Assuming comparable token counts across models on the
+identical pipeline, relative cost is governed by this per-token price
+ratio, which is dimensionless and independent of any single price sheet.
+This assumption may not hold in general, since different models emit
+different numbers of tokens for the same input, especially models that
+perform explicit reasoning or thinking. As one concrete instantiation, at
+the time of the experiment a 160-round GPT-4o-mini run cost approximately
+\$0.07 versus \$1.10 for GPT-4o, a 16$\times$ cost difference for 4.3
+percentage points lower accuracy on this pipeline. Normalized by outcome,
+the GPT-4o-mini pipeline yields approximately 16$\times$ more successful
+builds per unit cost, a cost-effectiveness comparison that does not depend
+on absolute prices and remains valid when token usage differs across
+models \parencite{chen2023frugalgpt}.
 
 \begin{table}[t]
 \centering
@@ -778,11 +799,21 @@ transfer benchmark, supports the conjecture that the design principle
 applies to other physically or logically constrained domains with
 deterministically computable output dimensions, including
 terrain-following navigation, robotic assembly, and code generation under
-structural constraints. We do not claim general applicability beyond what
+structural constraints, where injecting deterministic structure into code
+agents has independently been shown to reduce run-to-run variance and
+improve reliability \parencite{lin2026anchoring}. We do not claim general applicability beyond what
 these two benchmarks show. The boundary between deterministic and
-reasoning dimensions is not always sharp, and in more complex tasks some
-dimensions are only partly determined by task state, which is where the
-principle needs further study. The taxonomy of three categories, geometric
+reasoning dimensions is not always sharp, and the principle breaks down
+when its governing assumption does not hold. In the IGLU transfer, some
+target structures contained floating blocks whose height gravity does not
+fix, so the evaluation used only gravity-compatible tasks, and recognizing
+where a constraint fails is itself a reasoning task. The location of the
+boundary also depends on model capability. As base models improve and make
+fewer errors on a computable dimension, the reliability gained by
+delegating that dimension to a deterministic executor narrows, so the
+value of the decomposition is largest for smaller and lower-cost models,
+while a frontier model may reach comparable accuracy at substantially
+higher token cost. The taxonomy of three categories, geometric
 constraints, procedural knowledge constraints, and workflow state
 management constraints, provides a structure for identifying decomposition
 opportunities in new domains. The primary design lever is not model
