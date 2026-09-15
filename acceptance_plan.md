@@ -149,6 +149,11 @@ These are more than a sentence but still need no new runs.
 1. Generalize the cost comparison. Review 2. Keep the concrete example and add a
    unitless or normalized version so the cost result does not depend on one
    implementation.
+   COMPLETED 2026-09-13. Kept the concrete dollar example, timestamped as of the
+   experiment, and added a dimensionless per-token price ratio with the
+   equal-token assumption stated and caveated for models that emit more tokens
+   when reasoning, plus an outcome-normalized cost-effectiveness sentence citing
+   FrugalGPT.
 2. Ground the taxonomy in literature. Review 2. Add citations for the three
    category taxonomy, geometric constraints, procedural knowledge constraints, and
    workflow state management constraints, near hicss_submission.tex line 746.
@@ -159,9 +164,29 @@ These are more than a sentence but still need no new runs.
 3. Release implementation details. Review 1. Prompts and the adaptive enrichment
    rules are not in the manuscript. Point to the public repo, or add a short
    supplementary appendix, so others can build on the work.
+   COMPLETED 2026-09-13. Added a reproducibility note at the end of the Artifact
+   section pointing to the benchmark repo for the green agent and grader, the
+   extended report, and the public implementation repository bwimimpl at tag
+   v1.0.5, which holds the source code, all planner prompts, the 15 enrichment
+   rules, evaluation scripts, and scoring logs.
 4. Add a domain extension paragraph. Review 4. Briefly discuss how the approach
    extends to other domains and where the deterministic versus reasoning line
    becomes unclear. This can share text with Stage 1 item 1.
+   COMPLETED 2026-09-13. The Conclusion names terrain-following navigation,
+   robotic assembly, and code generation as extension domains, cites Lin et al.
+   deterministic anchoring as complementary coding-domain evidence, adds the
+   capability-dependent boundary, and gives the concrete IGLU floating-block case
+   where the principle breaks down when the gravity assumption does not hold.
+
+## Cross-model generalization, Review 2 point 3, added this cycle
+
+COMPLETED 2026-09-13. Added a cursory cross-model paragraph to Findings reporting
+the identical untuned pipeline on DeepSeek-V3.2 at about 96 percent,
+Llama-4-Maverick at a reproducible 91.2 percent, and Kimi-K2.5 at about 84 percent
+via Azure AI Foundry, labeled preliminary and single-batch. The run logs are
+published in the public repository under logs/model_generalization and
+logs/nemotron3_super. Removed the weak Rules of ML tech report and the tangential
+Held machining citation to hold the paper at 10 pages.
 
 ## Stage 3, P3, stretch, needs new runs, likely defer
 
