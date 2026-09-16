@@ -100,7 +100,8 @@ planning, while eliminating entire classes of output error.
 
 We instantiate the principle in a 2.5-D spatial construction agent and
 evaluate it on the Build What I Mean (BWIM) benchmark \parencite{bwim},
-a publicly scored competition requiring block structure construction from
+a publicly scored competition on the AgentBeats assessment platform
+\parencite{liu2026agentbeats}, requiring block structure construction from
 natural-language instructions. The agent plans exclusively in the
 horizontal plane while a deterministic executor computes vertical
 placement via column occupancy. This 2.5-D decomposition, named by
@@ -339,7 +340,7 @@ runs, require no language model reasoning, and produce omission and
 sequencing errors when delegated to the LLM. Deterministic execution
 ordering is long formalized in software engineering, where build systems
 compute a correct order as a topological sort of a dependency graph
-\parencite{feldman1979, mokhov2018} and workflow systems catalog
+\parencite{feldman1979} and workflow systems catalog
 control-flow ordering constraints \parencite{aalst2003}.
 
 % ============================================================
@@ -554,23 +555,22 @@ independent of model-specific tuning.
 A cursory check supports cross-model generality. Running the identical
 untuned pipeline through Azure AI Foundry, DeepSeek-V3.2 reached 95.6 to
 96.2\% over six runs, Llama-4-Maverick a reproducible 91.2\%, and
-Kimi-K2.5 about 84\%, with no model-specific tuning. These are preliminary
-single-batch trials, and the logs are in the public repository.
+Kimi-K2.5 about 84\%. These are preliminary results, and the
+logs are in the public repository.
 
 GPT-4o incurs approximately 16.7$\times$ higher per-token cost than
 GPT-4o-mini. Assuming comparable token counts across models on the
 identical pipeline, relative cost is governed by this per-token price
 ratio, which is dimensionless and independent of any single price sheet.
 This assumption may not hold in general, since different models emit
-different numbers of tokens for the same input, especially models that
-perform explicit reasoning or thinking. As one concrete instantiation, at
+different numbers of tokens for the same input, especially reasoning
+models. As one concrete instantiation, at
 the time of the experiment a 160-round GPT-4o-mini run cost approximately
 \$0.07 versus \$1.10 for GPT-4o, a 16$\times$ cost difference for 4.3
 percentage points lower accuracy on this pipeline. Normalized by outcome,
 the GPT-4o-mini pipeline yields approximately 16$\times$ more successful
-builds per unit cost, a cost-effectiveness comparison that does not depend
-on absolute prices and remains valid when token usage differs across
-models \parencite{chen2023frugalgpt}.
+builds per unit cost, a comparison robust to cross-model token differences
+\parencite{chen2023frugalgpt}.
 
 \begin{table}[t]
 \centering
