@@ -85,9 +85,10 @@ nonetheless compute this value, and off-by-one height errors, duplicate
 placements, and miscounted stack heights are the predictable result
 \parencite{yamada2024, bang2023}. The same structural issue arises in
 other constrained domains. In terrain-following path planning, altitude is
-a function of horizontal position and terrain data. In robotic assembly
-with geometric constraints, some degrees of freedom are determined by
-constraint equations once the free dimensions are fixed. In automated code
+a function of horizontal position and terrain data. In robotic assembly and
+CNC machining with geometric constraints \parencite{held1991}, some degrees
+of freedom are determined by constraint equations once the free dimensions
+are fixed. In automated code
 generation, syntax rules and type constraints determine many tokens that
 language models nonetheless produce incorrectly.
 
@@ -383,13 +384,14 @@ The BWIM grid is a 2.5-D domain in the sense of \textcite{marr2010}: the
 vertical axis is not a free variable but a deterministic function of
 horizontal position and column occupancy. A block at $(x, y, z)$ can only
 exist if $y = 0$ or a block exists at $(x, y-1, z)$. The vertical
-coordinate of any new block is therefore:
+coordinate of any new block is therefore the lowest unoccupied height in
+its column (heights $0$ to $4$):
 \begin{equation}
-  y^*(x, z, G) = \min\{y \in \{0,\ldots,4\} \mid (x, y, z) \notin
-  \mathrm{dom}(G)\}
+  y^*(x, z, G) = \min\{\, y : (x, y, z) \notin \mathrm{dom}(G) \,\}
   \label{eq:ystar}
 \end{equation}
-where $\mathrm{dom}(G)$ is the set of occupied cells. Applying
+where $\mathrm{dom}(G)$ is the set of occupied cells. When the column is
+full this set is empty and the executor rejects the action. Applying
 deterministic-dimension reduction assigns $y^*$ to the symbolic executor
 and restricts the LLM to horizontal positions $(x, z)$ and block colors
 $c$.
@@ -502,7 +504,8 @@ size. Error attribution classifies all 1,920 GPT-4o-mini rounds as
 builder-origin or architect-origin.
 
 All primary runs use a single frozen code commit. Statistical significance
-uses Welch two-sample $t$-tests. Run-to-run variance reflects LLM
+uses Welch two-sample $t$-tests. Reported $p$-values are per-comparison and
+are not adjusted for multiple comparisons. Run-to-run variance reflects LLM
 sampling non-determinism rather than development changes.
 
 % ============================================================
@@ -545,32 +548,29 @@ outperforms GPT-4o by 4.3 percentage points ($p < 0.0001$,
 95\% CI $[3.6, 4.9]$ pp), a result opposite to what model scaling
 alone would predict.
 This finding should be interpreted with the caveat that prompt engineering
-was developed against GPT-4o-mini. Had development been conducted against
-GPT-4o from the start, GPT-4o results could plausibly be higher. However,
+was developed against GPT-4o-mini, so GPT-4o could plausibly score higher
+had it been the development target. However,
 GPT-4o with the untuned pipeline reaches 90.3\%, well above the best
 competing system's 76.3\% using GPT-4o without a decomposition pipeline
 \parencite{hisandan}, indicating that the pipeline provides value
 independent of model-specific tuning.
 
-A cursory check supports cross-model generality. Running the identical
-untuned pipeline through Azure AI Foundry, DeepSeek-V3.2 reached 95.6 to
-96.2\% over six runs, Llama-4-Maverick a reproducible 91.2\%, and
-Kimi-K2.5 about 84\%. These are preliminary results, and the
-logs are in the public repository.
+A cursory cross-model check running the identical untuned pipeline through
+Azure AI Foundry found DeepSeek-V3.2 at 95.6 to 96.2\% over six runs,
+Llama-4-Maverick a reproducible 91.2\%, and Kimi-K2.5 about 84\%. These are
+preliminary results, and the logs are in the public repository.
 
 GPT-4o incurs approximately 16.7$\times$ higher per-token cost than
-GPT-4o-mini. Assuming comparable token counts across models on the
-identical pipeline, relative cost is governed by this per-token price
-ratio, which is dimensionless and independent of any single price sheet.
-This assumption may not hold in general, since different models emit
-different numbers of tokens for the same input, especially reasoning
-models. As one concrete instantiation, at
+GPT-4o-mini. Assuming comparable token counts on the identical pipeline,
+relative cost is governed by this dimensionless per-token price ratio.
+This assumption may not hold in general, since models emit different
+token counts for the same input, especially reasoning models. As one
+concrete instantiation, at
 the time of the experiment a 160-round GPT-4o-mini run cost approximately
 \$0.07 versus \$1.10 for GPT-4o, a 16$\times$ cost difference for 4.3
 percentage points lower accuracy on this pipeline. Normalized by outcome,
 the GPT-4o-mini pipeline yields approximately 16$\times$ more successful
-builds per unit cost, a comparison robust to cross-model token differences
-\parencite{chen2023frugalgpt}.
+builds per unit cost \parencite{chen2023frugalgpt}.
 
 \begin{table}[t]
 \centering
