@@ -449,7 +449,7 @@ target structure, answers correctly. This assumption is discussed further
 in Section~\ref{sec:findings}. Setting equal and solving yields
 indifference threshold $p^* = 3/4$. The agent asks when $p < 0.75$.
 Color inference achieves approximately 80\% on inferable cases (above
-$p^*$); count inference achieves approximately 65\% (below $p^*$), so the
+$p^*$). Count inference achieves approximately 65\% (below $p^*$), so the
 agent asks whenever a count is underspecified and no question has been
 used in the current round. Questions are color-specific to allow the
 upstream architect to identify the correct stack.
@@ -489,7 +489,9 @@ cost constraints. GPT-4o runs use the same pipeline with no model-specific
 tuning.
 
 For cross-benchmark transfer, 500 gravity-compatible tasks from the IGLU
-collaborative building dataset \parencite{iglu2022} compare a bare
+collaborative building dataset \parencite{iglu2022}, the first 500 of the
+3{,}365 of 6{,}349 single-turn tasks (53\%) whose targets contain no
+floating blocks, compare a bare
 coordinate-output prompt against the 2.5-D decomposed prompt at
 temperature 0, with no enrichment rules, plan verifier, or
 underspecification handling. This isolates the decomposition contribution
@@ -504,8 +506,9 @@ size. Error attribution classifies all 1,920 GPT-4o-mini rounds as
 builder-origin or architect-origin.
 
 All primary runs use a single frozen code commit. Statistical significance
-uses Welch two-sample $t$-tests. Reported $p$-values are per-comparison and
-are not adjusted for multiple comparisons. Run-to-run variance reflects LLM
+uses Welch two-sample $t$-tests. Reported $p$-values are per-comparison, and
+all ablation effects except the plan verifier remain significant under
+Holm-Bonferroni correction at $\alpha = 0.05$. Run-to-run variance reflects LLM
 sampling non-determinism rather than development changes.
 
 % ============================================================
@@ -522,6 +525,12 @@ enrichment accounts for $-11.3$ pp and the skip-forward rule for $-3.9$
 pp. The plan verifier shows no statistically significant effect ($-0.6$
 pp, $p = 0.36$), suggesting enrichment rules prevent most errors the
 verifier would otherwise target.
+A reanalysis of the existing ablation runs decomposes this gap.
+Reapplying the deterministic height rule to the model's own 3D outputs
+recovers 19.2 pp to about 85\%, but the remaining 9.5 pp stays below the
+full system, indicating that post-hoc correction remedies some but not all
+of the loss and that removing the dimension from the schema carries
+independent value.
 
 \begin{table}[t]
 \centering
@@ -547,7 +556,7 @@ Table~\ref{tab:comparison} shows the model comparison. GPT-4o-mini
 outperforms GPT-4o by 4.3 percentage points ($p < 0.0001$,
 95\% CI $[3.6, 4.9]$ pp), a result opposite to what model scaling
 alone would predict.
-This finding should be interpreted with the caveat that prompt engineering
+Prompt engineering
 was developed against GPT-4o-mini, so GPT-4o could plausibly score higher
 had it been the development target. However,
 GPT-4o with the untuned pipeline reaches 90.3\%, well above the best
@@ -555,18 +564,16 @@ competing system's 76.3\% using GPT-4o without a decomposition pipeline
 \parencite{hisandan}, indicating that the pipeline provides value
 independent of model-specific tuning.
 
-A cursory cross-model check running the identical untuned pipeline through
-Azure AI Foundry found DeepSeek-V3.2 at 95.6 to 96.2\% over six runs,
+A cursory cross-model check on the untuned pipeline via Azure AI Foundry
+found DeepSeek-V3.2 at 95.6 to 96.2\% over six runs,
 Llama-4-Maverick a reproducible 91.2\%, and Kimi-K2.5 about 84\%. These are
 preliminary results, and the logs are in the public repository.
 
 GPT-4o incurs approximately 16.7$\times$ higher per-token cost than
-GPT-4o-mini. Assuming comparable token counts on the identical pipeline,
-relative cost is governed by this dimensionless per-token price ratio.
-This assumption may not hold in general, since models emit different
-token counts for the same input, especially reasoning models. As one
-concrete instantiation, at
-the time of the experiment a 160-round GPT-4o-mini run cost approximately
+GPT-4o-mini. Assuming comparable token counts, relative cost is governed by
+this per-token price ratio, though this may not hold since models emit
+different token counts for the same input, especially reasoning models. A
+160-round GPT-4o-mini run cost approximately
 \$0.07 versus \$1.10 for GPT-4o, a 16$\times$ cost difference for 4.3
 percentage points lower accuracy on this pipeline. Normalized by outcome,
 the GPT-4o-mini pipeline yields approximately 16$\times$ more successful
@@ -592,7 +599,9 @@ Blackwell GPU, full reasoning.}
 
 On 500 IGLU tasks, 2.5-D decomposition improved mean block-level F1 from
 0.723 to 0.798 (paired $t(499) = 5.76$, $p < 10^{-8}$, $d = 0.26$,
-95\% CI $[0.050, 0.101]$). The effect size is small ($d = 0.26$),
+95\% CI $[0.050, 0.101]$). The improvement persists on the stricter
+additive-only subset that excludes removals, where F1 rises from 0.776 to
+0.820 (paired $t(499) = 4.39$, $p < 0.001$). The effect size is small ($d = 0.26$),
 confirming that transfer validates the dimensional reduction principle
 alone, not the full pipeline. No enrichment rules, plan verifier, or
 underspecification handling were used. This confirms the principle
@@ -618,7 +627,9 @@ model), enabling cache hits that are not possible when the prompt falls
 short of a full page. The resulting cache hit rate is approximately 85\%.
 Mean per-request latency fell from 59.0 seconds to 19.7 seconds (median
 from 48.2s to 17.1s), a 3.0$\times$ reduction at an accuracy cost of 0.4
-percentage points (95.6\%).
+percentage points (95.6\%). The low-effort setting, the longer prompt, and
+crossing the prefix cache page boundary act together in this result, so
+isolating each factor's contribution would require a factorial design.
 
 \begin{table}[t]
 \centering
