@@ -123,10 +123,6 @@ contribute most? Second, does a decomposed architecture reduce dependence
 on large frontier models, and does it remain viable on cost-constrained
 and edge hardware? Third, does the principle transfer to a structurally
 different benchmark?
-The first two questions are addressed through controlled experiments on the
-BWIM benchmark. The third is addressed through an IGLU cross-benchmark
-transfer experiment.
-
 The contributions of this paper are: (1) the deterministic-dimension
 reduction design principle, including an analysis of multiplicative
 error accumulation showing that, under the stated assumptions, a symbolic
@@ -228,10 +224,11 @@ methods, and constructs that expand what is achievable in practice
 \parencite{hevner2004}. The design-science framing is appropriate here
 because the primary contribution is not a benchmark result but a design
 principle applicable beyond any single domain or benchmark. This is an
-improvement contribution \parencite{hevner2004}: reduce LLM errors on
+improvement contribution \parencite{gregorhevner2013}: reduce LLM errors on
 deterministic output dimensions by offloading them to a provably correct
 symbolic executor when those dimensions are computable in closed form.
-BWIM and IGLU provide an artificial, summative evaluation.
+BWIM and IGLU provide an artificial rather than naturalistic evaluation,
+using benchmark tasks rather than deployed use.
 
 % ============================================================
 \section{Deterministic-Dimension Reduction}
@@ -454,8 +451,7 @@ a correct unaided guess. The expected values are:
   \mathrm{EV}_{\mathrm{ask}} &= 10 - 5 = 5 \label{eq:ev_ask}
 \end{align}
 assuming the upstream architect, itself an LLM agent with access to the
-target structure, answers correctly. This assumption is discussed further
-in Section~\ref{sec:findings}. Setting equal and solving yields
+target structure, answers correctly. Setting equal and solving yields
 indifference threshold $p^* = 3/4$. The agent asks when $p < 0.75$.
 Color inference achieves approximately 80\% on inferable cases (above
 $p^*$). Count inference achieves approximately 65\% (below $p^*$), so the
@@ -492,7 +488,9 @@ conditions. The first is a BWIM 160-round benchmark with GPT-4o-mini,
 $n = 12$ independent runs, plus component ablation ($n = 7$ per condition)
 removing one pipeline component at a time from the full system. The second
 is a head-to-head comparison of GPT-4o-mini and GPT-4o, $n = 12$ and
-$n = 6$ respectively, on the identical frozen pipeline. All prompt
+$n = 6$ respectively, on the identical frozen pipeline, and a
+no-decomposition ablation of GPT-4o generating coordinates directly
+($n = 8$). All prompt
 engineering and enrichment rules were developed against GPT-4o-mini due to
 cost constraints. GPT-4o runs use the same pipeline with no model-specific
 tuning.
@@ -531,8 +529,8 @@ Underspecification questions contribute the second largest effect
 ($-17.9$ pp), consistent with the $p^* = 0.75$ threshold. Adaptive prompt
 enrichment accounts for $-11.3$ pp and the skip-forward rule for $-3.9$
 pp. The plan verifier shows no statistically significant effect ($-0.6$
-pp, $p = 0.36$), suggesting enrichment rules prevent most errors the
-verifier would otherwise target.
+pp, $p = 0.36$, $n = 7$), consistent with enrichment rules preventing
+most errors the verifier would otherwise target.
 A reanalysis of the existing ablation runs decomposes this gap.
 Reapplying the deterministic height rule to the model's own 3D outputs
 recovers 19.2 pp to about 85\%, but the remaining 9.5 pp stays below the
@@ -640,11 +638,11 @@ from 48.2s to 17.1s), a 3.0$\times$ reduction at an accuracy cost of 0.4
 percentage points (95.6\%). The low-effort setting, the longer prompt, and
 crossing the prefix cache page boundary act together in this result, so
 isolating each factor's contribution would require a factorial design.
-Tegrastats measurements over all 12 runs show 71--75\,W mean board draw
-in both conditions, dominated by the 108--119\,GB DRAM footprint of the
-loaded model. Energy per round falls from 17.1\,kJ under full reasoning
-to 6.1\,kJ under low-effort (2.8$\times$), tracking the latency
-reduction rather than a change in power draw.
+Tegrastats measurements show 71\,W mean board draw under full reasoning
+and 75\,W under low-effort, dominated by the 108--119\,GB DRAM footprint
+of the loaded model. Per-request energy is approximately 4.2\,kJ
+(71\,W\,$\times$\,59.0\,s) and 1.5\,kJ (75\,W\,$\times$\,19.7\,s)
+respectively, a 2.8$\times$ reduction.
 
 \begin{table}[t]
 \centering
@@ -783,14 +781,10 @@ A central limitation is that all enrichment rules and prompt examples were
 developed against GPT-4o-mini, while GPT-4o ran on the same pipeline with
 no model-specific tuning. The comparison therefore cannot separate the
 effect of the architecture from the effect of prompt optimization, and the
-GPT-4o result may be understated. A fair test would tune each model
-pipeline to a similar degree. The plan verifier null result ($p = 0.36$,
-$n = 7$) may reflect insufficient statistical power rather than a true
-null effect.
+GPT-4o result may be understated.
 
-The 15 enrichment rules were developed by analyzing BWIM failure modes.
-Their coverage of failure modes in other instruction distributions is
-unknown.
+The 15 enrichment rules were derived from BWIM failure modes, and their
+coverage of other instruction distributions is untested.
 
 The strict dominance argument assumes the free and deterministic
 dimensions are independent in the sense that generating $v_\mathrm{det}$
