@@ -106,7 +106,7 @@ a publicly scored competition on the AgentBeats assessment platform
 natural-language instructions. The agent plans exclusively in the
 horizontal plane while a deterministic executor computes vertical
 placement via column occupancy. This 2.5-D decomposition, named by
-analogy with \textcite{marr2010}'s 2.5-D sketch, reduces the likelihood
+analogy with \textcite{marr1982vision}'s 2.5-D sketch, reduces the likelihood
 of $y$-coordinate errors.
 
 An earlier conference paper presents the 2.5-D spatial construction
@@ -227,7 +227,11 @@ Design science research produces artifact knowledge: design principles,
 methods, and constructs that expand what is achievable in practice
 \parencite{hevner2004}. The design-science framing is appropriate here
 because the primary contribution is not a benchmark result but a design
-principle applicable beyond any single domain or benchmark.
+principle applicable beyond any single domain or benchmark. This is an
+improvement contribution \parencite{hevner2004}: reduce LLM errors on
+deterministic output dimensions by offloading them to a provably correct
+symbolic executor when those dimensions are computable in closed form.
+BWIM and IGLU provide an artificial, summative evaluation.
 
 % ============================================================
 \section{Deterministic-Dimension Reduction}
@@ -297,8 +301,8 @@ The principle applies when two conditions hold: (a) one or more output
 dimensions are deterministic functions of task state and the remaining
 output, and (b) the function $f$ is computable in closed form or by a
 finite algorithm. When both conditions hold, the dominance argument above
-guarantees that a correct symbolic executor weakly dominates the language
-model on those dimensions regardless of the model's error rate. The only
+guarantees that a correct symbolic executor strictly dominates the language
+model on those dimensions for any positive error rate $\varepsilon > 0$. The only
 remaining question is whether the engineering cost of implementing $f$ is
 justified by the expected error reduction.
 
@@ -343,6 +347,8 @@ ordering is long formalized in software engineering, where build systems
 compute a correct order as a topological sort of a dependency graph
 \parencite{feldman1979} and workflow systems catalog
 control-flow ordering constraints \parencite{aalst2003}.
+We refer to these three categories as domain-law constraints,
+procedural-knowledge constraints, and workflow-state constraints.
 
 % ============================================================
 \section{Artifact: 2.5-D Construction Agent}
@@ -380,14 +386,17 @@ two blocks, and place a purple block at each arm endpoint. The 2D plan
 specifies only horizontal positions and colors. Vertical placement is
 computed by the deterministic executor from column occupancy.
 
-The BWIM grid is a 2.5-D domain in the sense of \textcite{marr2010}: the
+The BWIM grid is a 2.5-D domain in the sense of \textcite{marr1982vision}: the
 vertical axis is not a free variable but a deterministic function of
 horizontal position and column occupancy. A block at $(x, y, z)$ can only
 exist if $y = 0$ or a block exists at $(x, y-1, z)$. The vertical
 coordinate of any new block is therefore the lowest unoccupied height in
-its column (heights $0$ to $4$):
+its column:
 \begin{equation}
-  y^*(x, z, G) = \min\{\, y : (x, y, z) \notin \mathrm{dom}(G) \,\}
+\begin{split}
+  y^*(x, z, G) = \min\{&\, y \in \{0,\dots,4\} : \\
+                        &(x, y, z) \notin \mathrm{dom}(G) \,\}
+\end{split}
   \label{eq:ystar}
 \end{equation}
 where $\mathrm{dom}(G)$ is the set of occupied cells. When the column is
@@ -442,7 +451,7 @@ creates an asymmetric decision problem. Let $p$ denote the probability of
 a correct unaided guess. The expected values are:
 \begin{align}
   \mathrm{EV}_{\mathrm{guess}}(p) &= 20p - 10 \label{eq:ev_guess} \\
-  \mathrm{EV}_{\mathrm{ask}} &\approx 20 - 15 = 5 \label{eq:ev_ask}
+  \mathrm{EV}_{\mathrm{ask}} &= 10 - 5 = 5 \label{eq:ev_ask}
 \end{align}
 assuming the upstream architect, itself an LLM agent with access to the
 target structure, answers correctly. This assumption is discussed further
@@ -467,7 +476,7 @@ classify by input trigger, write targeted corrections with examples,
 inject dynamically, and validate against regressions.
 
 The benchmark task, including the architect (green) agent and the scoring
-harness, is publicly available \parencite{bwim}. The extended report
+harness, is publicly available \parencite{bwim}. The NAECON paper
 \parencite{11674959} describes the pipeline, and the complete source code,
 all planner prompts, the 15 adaptive enrichment rules, evaluation scripts,
 and scoring logs are released in the public implementation repository
@@ -490,19 +499,18 @@ tuning.
 
 For cross-benchmark transfer, 500 gravity-compatible tasks from the IGLU
 collaborative building dataset \parencite{iglu2022}, the first 500 of the
-3{,}365 of 6{,}349 single-turn tasks (53\%) whose targets contain no
+3{,}365 (53\%) of 6{,}349 single-turn tasks whose targets contain no
 floating blocks, compare a bare
-coordinate-output prompt against the 2.5-D decomposed prompt at
-temperature 0, with no enrichment rules, plan verifier, or
+coordinate-output prompt against the 2.5-D decomposed prompt using
+GPT-4o-mini in a single run at temperature 0, with no enrichment rules, plan verifier, or
 underspecification handling. This isolates the decomposition contribution
 on an independent benchmark ($11 \times 9 \times 11$ grid, different
 instructions). For edge deployment,
-Nemotron-3-Super-120B-A12B-NVFP4 \parencite{nemotron2024} runs locally on
+Nemotron-3-Super-120B-A12B-NVFP4 \parencite{nemotron2026} runs locally on
 an NVIDIA Jetson Thor AGX Developer Kit \parencite{jetsonthor} via
 vLLM \parencite{vllm2023} (Blackwell GPU, Arm Neoverse V3AE CPU) under two
 conditions: full reasoning with 9 examples, and low-effort reasoning with
-13 examples designed to exceed the model's 8,320-token prefix cache page
-size. Error attribution classifies all 1,920 GPT-4o-mini rounds as
+13 examples designed to exceed the model's Mamba-2 page size (8,320 tokens). Error attribution classifies all 1,920 GPT-4o-mini rounds as
 builder-origin or architect-origin.
 
 All primary runs use a single frozen code commit. Statistical significance
@@ -530,7 +538,8 @@ Reapplying the deterministic height rule to the model's own 3D outputs
 recovers 19.2 pp to about 85\%, but the remaining 9.5 pp stays below the
 full system, indicating that post-hoc correction remedies some but not all
 of the loss and that removing the dimension from the schema carries
-independent value.
+independent value, though this residual may also reflect that the 3D
+condition reuses examples written for the 2D format.
 
 \begin{table}[t]
 \centering
@@ -563,6 +572,9 @@ GPT-4o with the untuned pipeline reaches 90.3\%, well above the best
 competing system's 76.3\% using GPT-4o without a decomposition pipeline
 \parencite{hisandan}, indicating that the pipeline provides value
 independent of model-specific tuning.
+In a controlled comparison, GPT-4o generating coordinates directly in the
+ablation configuration reaches 79.4\% (mean over 8 runs, $\sigma = 0.55$ pp),
+15.2 pp below GPT-4o-mini with the full pipeline.
 
 A cursory cross-model check on the untuned pipeline via Azure AI Foundry
 found DeepSeek-V3.2 at 95.6 to 96.2\% over six runs,
@@ -599,12 +611,12 @@ Blackwell GPU, full reasoning.}
 
 On 500 IGLU tasks, 2.5-D decomposition improved mean block-level F1 from
 0.723 to 0.798 (paired $t(499) = 5.76$, $p < 10^{-8}$, $d = 0.26$,
-95\% CI $[0.050, 0.101]$). The improvement persists on the stricter
-additive-only subset that excludes removals, where F1 rises from 0.776 to
-0.820 (paired $t(499) = 4.39$, $p < 0.001$). The effect size is small ($d = 0.26$),
-confirming that transfer validates the dimensional reduction principle
-alone, not the full pipeline. No enrichment rules, plan verifier, or
-underspecification handling were used. This confirms the principle
+95\% CI $[0.050, 0.101]$). The improvement persists on a separate set of
+500 additive-only gravity-compatible tasks that exclude removals, where F1
+rises from 0.776 to
+0.820 (paired $t(499) = 4.39$, $p < 0.001$). The effect is modest ($d = 0.26$), as expected, since only the
+decomposition, not the enrichment rules, verifier, or clarification
+handling, was transferred. This confirms the principle
 generalizes to an independent benchmark with a larger grid and different
 instructions.
 
@@ -613,8 +625,7 @@ as GPT-4o-mini with full reasoning enabled, achieving 96.0\% accuracy
 ($\sigma = 0.31\%$, $+993$ mean score), slightly exceeding the GPT-4o-mini
 cloud mean ($p < 0.001$). The accuracy advantage may reflect the model's
 explicit reasoning mode (120B parameters, 12B active via mixture of
-experts) combined with the elimination of network latency variability in
-local deployment. This demonstrates that the architecture transfers
+experts). This demonstrates that the architecture transfers
 to a locally hosted open-weight model on edge hardware without
 prompt modifications.
 
@@ -622,14 +633,18 @@ A follow-on evaluation enabled low-effort reasoning, an inference setting
 that reduces the number of tokens the model spends on internal
 deliberation, and expanded the system prompt from 9 to 13 examples,
 increasing prompt length from approximately 7,400 to 9,140 tokens. This
-exceeds the model's prefix cache page size (8,320 tokens in vLLM for this
-model), enabling cache hits that are not possible when the prompt falls
+exceeds the model's Mamba-2 page size (8,320 tokens), enabling cache hits that are not possible when the prompt falls
 short of a full page. The resulting cache hit rate is approximately 85\%.
 Mean per-request latency fell from 59.0 seconds to 19.7 seconds (median
 from 48.2s to 17.1s), a 3.0$\times$ reduction at an accuracy cost of 0.4
 percentage points (95.6\%). The low-effort setting, the longer prompt, and
 crossing the prefix cache page boundary act together in this result, so
 isolating each factor's contribution would require a factorial design.
+Tegrastats measurements over all 12 runs show 71--75\,W mean board draw
+in both conditions, dominated by the 108--119\,GB DRAM footprint of the
+loaded model. Energy per round falls from 17.1\,kJ under full reasoning
+to 6.1\,kJ under low-effort (2.8$\times$), tracking the latency
+reduction rather than a change in power draw.
 
 \begin{table}[t]
 \centering
@@ -714,8 +729,8 @@ systems in constrained domains.
 %\end{table*}
 
 (1) Identify all output dimensions that are deterministic functions of task
-state, classifying them as geometric constraints, procedural knowledge
-constraints, or workflow state management constraints. Remove them from
+state, classifying them as domain-law constraints, procedural-knowledge
+constraints, or workflow-state constraints. Remove them from
 the LLM output schema and compute them with a symbolic executor.
 Eliminating a dimension removes its error class entirely, which is
 qualitatively different from prompt tuning or model scaling.
@@ -824,9 +839,9 @@ fewer errors on a computable dimension, the reliability gained by
 delegating that dimension to a deterministic executor narrows, so the
 value of the decomposition is largest for smaller and lower-cost models,
 while a frontier model may reach comparable accuracy at substantially
-higher token cost. The taxonomy of three categories, geometric
-constraints, procedural knowledge constraints, and workflow state
-management constraints, provides a structure for identifying decomposition
+higher token cost. The taxonomy of three categories, domain-law constraints,
+procedural-knowledge constraints, and workflow-state constraints,
+provides a structure for identifying decomposition
 opportunities in new domains. The primary design lever is not model
 selection but responsibility boundary placement.
 
