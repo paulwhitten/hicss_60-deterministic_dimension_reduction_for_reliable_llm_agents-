@@ -1,0 +1,15 @@
+Reliable language model agents in physically constrained domains often
+assign output dimensions to the model that are deterministic functions of
+task state. We introduce deterministic-dimension reduction, a design
+principle in which such dimensions are computed outside the model by a
+symbolic executor, reducing the model to language understanding and plan
+generation while eliminating entire error classes. We instantiate the
+principle in a 2.5-D spatial construction agent: the model plans in the
+horizontal plane while a deterministic executor computes vertical placement
+from column occupancy. Across the Build What I Mean benchmark, a component
+ablation, cross-model comparison, IGLU transfer, and edge deployment, we
+find that architectural decomposition improves
+reliability more than model scaling alone. A small, low-cost model with the
+decomposition architecture matches or exceeds a frontier model generating
+coordinates directly. We extract five design implications for reliable,
+cost-aware, and deployable agentic systems.
